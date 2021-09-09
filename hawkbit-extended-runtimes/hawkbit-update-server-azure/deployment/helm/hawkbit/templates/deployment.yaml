@@ -71,6 +71,16 @@ spec:
                 secretKeyRef:
                   name: hawkbit-infra-secrets
                   key: insights-key
+            - name: SPRING_SECURITY_USER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: hawkbit-infra-secrets
+                  key: user-name
+            - name: SPRING_SECURITY_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hawkbit-infra-secrets
+                  key: user-password
             - name: MANAGEMENT_METRICS_EXPORT_AZUREMONITOR_ENABLED
               value: "{{ .Values.insights.enabled }}"
           livenessProbe:

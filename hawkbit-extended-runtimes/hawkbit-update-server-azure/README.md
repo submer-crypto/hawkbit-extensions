@@ -61,7 +61,7 @@ resourcegroup_name=hawkbit
 az group create --name $resourcegroup_name --location "westeurope"
 ```
 
-With the next command we will use the provided [Azure Resource Manager (ARM)](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-overview) templates to setup the AKS cluster. This might take a while. So maybe time to try out this meditation thing :smile:
+With the next command we will use the provided [Azure Resource Manager (ARM)](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-overview) templates to setup the AKS cluster. The `uniqueSolutionPrefix` parameter will be used to generate names for the resources and the domain name, e.g. choosing `myprefix` will result in a domain name like `myprefixhawkbit`. This might take a while. So maybe time to try out this meditation thing :smile:
 
 ```bash
 cd deployment
@@ -108,6 +108,7 @@ Deploy Nginx as Kubernetes Ingress controller.
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
 helm upgrade hawkbit-ingress ingress-nginx/ingress-nginx \
+    --version 4.0.1 \
     --namespace $k8s_namespace \
     --set controller.service.loadBalancerIP=$ip_address \
     --set controller.replicaCount=2 \
@@ -125,7 +126,8 @@ helm repo update
 helm upgrade hawkbit-cert-manager jetstack/cert-manager \
     --namespace $k8s_namespace \
     --set installCRDs=true \
-    --version v0.16.1 --install
+    --version v0.16.1 \
+    --install
 ```
 
 Now install hawkBit:
@@ -143,7 +145,9 @@ helm upgrade hawkbit helm/hawkbit \
     --set storage.url=$storage_url \
     --set eventHubs.connectionString=$eh_connection \
     --set eventHubs.namespace=$eh_ns \
-    --set insights.enabled=false
+    --set insights.enabled=false \
+    --set user.name=admin \
+    --set user.password='{noop}password'
 ```
 
 Now check your deployment.
