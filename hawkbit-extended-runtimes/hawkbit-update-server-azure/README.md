@@ -147,7 +147,8 @@ helm upgrade hawkbit helm/hawkbit \
     --set eventHubs.namespace=$eh_ns \
     --set insights.enabled=false \
     --set user.name=admin \
-    --set user.password=\\{noop\\}password
+    --set user.password=\\{noop\\}password \
+    --set ddi.authentication.anonymous=true
 ```
 
 Now check your deployment.

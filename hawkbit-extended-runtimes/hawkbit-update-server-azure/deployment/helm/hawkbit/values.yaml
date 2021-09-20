@@ -20,6 +20,14 @@ db:
   password:
   url:
 
+user:
+  name: admin
+  password: admin
+
+ddi:
+  authentication:
+    anonymous: false
+
 eventHubs:
   connectionString:
   namespace:

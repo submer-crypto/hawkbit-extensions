@@ -81,6 +81,8 @@ spec:
                 secretKeyRef:
                   name: hawkbit-infra-secrets
                   key: user-password
+            - name: HAWKBIT_SERVER_DDI_SECURITY_AUTHENTICATION_ANONYMOUS_ENABLED
+              value: "{{ .Values.ddi.authentication.anonymous }}"
             - name: MANAGEMENT_METRICS_EXPORT_AZUREMONITOR_ENABLED
               value: "{{ .Values.insights.enabled }}"
           livenessProbe:
