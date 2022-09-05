@@ -252,7 +252,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "https://raw.githubusercontent.com/thermocline-labs/hawkbit-extensions/azure/hawkbit-extended-runtimes/hawkbit-update-server-azure/deployment/arm/templates/kubernetesDeploy.json"
+                    "uri": "https://raw.githubusercontent.com/submer-crypto/hawkbit-extensions/azure/hawkbit-extended-runtimes/hawkbit-update-server-azure/deployment/arm/templates/kubernetesDeploy.json"
                 },
                 "parameters": {
                     "clusterName": {
