@@ -27,7 +27,7 @@ mvn clean install
 
 ### Package and push the docker image
 
-In this example we expect that you have a [Azure Container Registry (ACR)](https://azure.microsoft.com/en-us/services/container-registry/), are logged in and have the credentials extracted. However, pushing your image to Docker Hub works as well.
+In this example we expect that you have a [Azure Container Registry (ACR)](https://azure.microsoft.com/en-us/services/container-registry/), are logged in and have the credentials extracted. However, pushing your image to Docker Hub works as well. Make sure to use all lowercase letters for registry name below, even if the name contains uppercase letters on Azure, otherwise docker might complain.
 
 ```bash
 acr_resourcegroupname=YOUR_ACR_RG
@@ -47,7 +47,7 @@ As described [here](https://docs.microsoft.com/en-gb/azure/aks/kubernetes-servic
 ```bash
 service_principal=`az ad sp create-for-rbac --name http://hawkBitServicePrincipal --skip-assignment --output tsv`
 app_id_principal=`echo $service_principal|cut -f1 -d ' '`
-password_principal=`echo $service_principal|cut -f4 -d ' '`
+password_principal=`echo $service_principal|cut -f3 -d ' '`
 object_id_principal=`az ad sp show --id $app_id_principal --query objectId --output tsv`
 acr_id_access_registry=`az acr show --resource-group $acr_resourcegroupname --name $acr_registry_name --query "id" --output tsv`
 ```
@@ -66,21 +66,22 @@ With the next command we will use the provided [Azure Resource Manager (ARM)](ht
 ```bash
 cd deployment
 unique_solution_prefix=myprefix
-az deployment group create --name hawkBitBasicInfrastructure --resource-group $resourcegroup_name --template-file arm/hawkBitInfrastructureDeployment.json --parameters uniqueSolutionPrefix=$unique_solution_prefix servicePrincipalObjectId=$object_id_principal servicePrincipalClientId=$app_id_principal servicePrincipalClientSecret=$password_principal
+deployment_group_name=hawkBitBasicInfrastructure
+az deployment group create --name $deployment_group_name --resource-group $resourcegroup_name --template-file arm/hawkBitInfrastructureDeployment.json --parameters uniqueSolutionPrefix=$unique_solution_prefix servicePrincipalObjectId=$object_id_principal servicePrincipalClientId=$app_id_principal servicePrincipalClientSecret=$password_principal
 ```
 
 Retrieve secrets from the deployment:
 
 ```bash
-aks_cluster_name=`az deployment group show --name hawkBitBasicInfrastructure --resource-group $resourcegroup_name --query properties.outputs.aksClusterName.value -o tsv`
-ip_address=`az deployment group show --name hawkBitBasicInfrastructure --resource-group $resourcegroup_name --query properties.outputs.publicIPAddress.value -o tsv`
-public_fqdn=`az deployment group show --name hawkBitBasicInfrastructure --resource-group $resourcegroup_name --query properties.outputs.publicIPFQDN.value -o tsv`
-db_password=`az deployment group show --name hawkBitBasicInfrastructure --resource-group $resourcegroup_name --query properties.outputs.dbAdministratorLoginPassword.value -o tsv`
-db_user=`az deployment group show --name hawkBitBasicInfrastructure --resource-group $resourcegroup_name --query properties.outputs.dbAdministratorLogin.value -o tsv`
-db_url=`az deployment group show --name hawkBitBasicInfrastructure --resource-group $resourcegroup_name --query properties.outputs.dbUri.value -o tsv`
-storage_url=`az deployment group show --name hawkBitBasicInfrastructure --resource-group $resourcegroup_name --query properties.outputs.storageConnectionString.value -o tsv`
-eh_connection=`az deployment group show --name hawkBitBasicInfrastructure --resource-group $resourcegroup_name --query properties.outputs.ehNamespaceConnectionString.value -o tsv`
-eh_ns=`az deployment group show --name hawkBitBasicInfrastructure --resource-group $resourcegroup_name --query properties.outputs.ehNamespaceName.value -o tsv`
+aks_cluster_name=`az deployment group show --name $deployment_group_name --resource-group $resourcegroup_name --query properties.outputs.aksClusterName.value -o tsv`
+ip_address=`az deployment group show --name $deployment_group_name --resource-group $resourcegroup_name --query properties.outputs.publicIPAddress.value -o tsv`
+public_fqdn=`az deployment group show --name $deployment_group_name --resource-group $resourcegroup_name --query properties.outputs.publicIPFQDN.value -o tsv`
+db_password=`az deployment group show --name $deployment_group_name --resource-group $resourcegroup_name --query properties.outputs.dbAdministratorLoginPassword.value -o tsv`
+db_user=`az deployment group show --name $deployment_group_name --resource-group $resourcegroup_name --query properties.outputs.dbAdministratorLogin.value -o tsv`
+db_url=`az deployment group show --name $deployment_group_name --resource-group $resourcegroup_name --query properties.outputs.dbUri.value -o tsv`
+storage_url=`az deployment group show --name $deployment_group_name --resource-group $resourcegroup_name --query properties.outputs.storageConnectionString.value -o tsv`
+eh_connection=`az deployment group show --name $deployment_group_name --resource-group $resourcegroup_name --query properties.outputs.ehNamespaceConnectionString.value -o tsv`
+eh_ns=`az deployment group show --name $deployment_group_name --resource-group $resourcegroup_name --query properties.outputs.ehNamespaceName.value -o tsv`
 ```
 
 Now you can set your cluster in `kubectl`.
@@ -126,7 +127,7 @@ helm repo update
 helm upgrade hawkbit-cert-manager jetstack/cert-manager \
     --namespace $k8s_namespace \
     --set installCRDs=true \
-    --version v0.16.1 \
+    --version 1.7.0 \
     --install
 ```
 
@@ -134,6 +135,7 @@ Now install hawkBit:
 
 ```bash
 helm upgrade hawkbit helm/hawkbit \
+    --version 1.4.0 \
     --install \
     --wait \
     --namespace $k8s_namespace \
@@ -150,6 +152,8 @@ helm upgrade hawkbit helm/hawkbit \
     --set user.password=\\{noop\\}password \
     --set ddi.authentication.anonymous=true
 ```
+
+Note if you want to specify the password in plaintext keep the `{noop}` prefix.
 
 Now check your deployment.
 
@@ -172,5 +176,5 @@ In case it does not open up you can take a look at the logs using `kubectl logs`
 If you no longer need any of the resources you created in this quick start, you can execute the az group delete command to remove the resource group and all resources it contains. This command deletes the running container as well.
 
 ```bash
-az group delete --name $resourcegroupname
+az group delete --name $resourcegroup_name
 ```
